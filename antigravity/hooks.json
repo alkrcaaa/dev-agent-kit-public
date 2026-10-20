@@ -1,0 +1,110 @@
+{
+  "dev-agent-kit": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "H=\"$HOME/.gemini/config/extern/obsidian-vault-bridge/hooks/vault-inject.py\"; [ -f \"$H\" ] && DAK_AGENT=antigravity python3 \"$H\" || true"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "view_file|write_to_file|replace_file_content|multi_replace_file_content|find_by_name|list_dir|grep_search|run_command|read_url_content|search_web|call_mcp_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/mem-bridge.py\" node \"$HOME/.claude-mem-lite/scripts/hook-launcher.mjs\" scripts/pre-tool-recall.js"
+          },
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/crg-gate.py\" gate"
+          },
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/bash-edit-guard.py\""
+          },
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/skill-gate.py\" gate"
+          },
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/commit-attribution-guard.py\""
+          },
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.gemini/config/extern/obsidian-vault-bridge/hooks/mem-save-guard.py\"; [ -f \"$H\" ] || exit 0; DAK_AGENT=antigravity python3 \"$H\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "view_file|write_to_file|replace_file_content|multi_replace_file_content|find_by_name|list_dir|grep_search|run_command|read_url_content|search_web|call_mcp_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/mem-bridge.py\" bash \"$HOME/.claude-mem-lite/scripts/post-tool-use.sh\""
+          },
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/crg-gate.py\" mark"
+          },
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/skill-gate.py\" mark"
+          },
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/crg-update.py\""
+          },
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/lint-on-edit.py\"",
+            "timeout": 60
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__playwright__.*|call_mcp_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=antigravity python3 \"$HOME/.gemini/config/hooks/snapshot-size-nudge.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mem-lite__.*|call_mcp_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.gemini/config/extern/obsidian-vault-bridge/hooks/obsidian-mirror.py\"; [ -f \"$H\" ] && DAK_AGENT=antigravity python3 \"$H\" || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node \"$HOME/.claude-mem-lite/scripts/hook-launcher.mjs\" hook.mjs stop"
+      },
+      {
+        "type": "command",
+        "command": "H=\"$HOME/.gemini/config/extern/obsidian-vault-bridge/hooks/personal-capture.py\"; [ -f \"$H\" ] && DAK_AGENT=antigravity python3 \"$H\" || true"
+      },
+      {
+        "type": "command",
+        "command": "H=\"$HOME/.gemini/config/extern/obsidian-vault-bridge/hooks/concept-capture.py\"; [ -f \"$H\" ] && DAK_AGENT=antigravity python3 \"$H\" || true"
+      },
+      {
+        "type": "command",
+        "command": "H=\"$HOME/.gemini/config/extern/obsidian-vault-bridge/hooks/project-narrative.py\"; [ -f \"$H\" ] && DAK_AGENT=antigravity python3 \"$H\" || true"
+      },
+      {
+        "type": "command",
+        "command": "H=\"$HOME/.gemini/config/extern/obsidian-vault-bridge/hooks/obsidian-mirror.py\"; [ -f \"$H\" ] && DAK_AGENT=antigravity python3 \"$H\" --reconcile || true"
+      }
+    ]
+  }
+}

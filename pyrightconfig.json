@@ -1,0 +1,16 @@
+{
+  "//": "Hooks are standalone scripts, not a package: Claude Code runs each as `python3 ~/.claude/hooks/<name>.py`, so sys.path[0] is the hooks dir and `import hook_metrics` resolves at runtime. Tell the analyzer the same thing so the shared helper is not flagged as missing.",
+  "extraPaths": [
+    "claude/hooks"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "extern",
+    ".code-review-graph",
+    "mcp-infra/code-review-graph",
+    "mcp-infra/llm-council-mcp",
+    "mcp-infra/local-model-mcp"
+  ],
+  "//submodules": "Submodules are separate repos with their own deps and CI; type-checking them here only reports their missing third-party imports."
+}

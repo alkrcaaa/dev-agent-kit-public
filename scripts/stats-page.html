@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kit Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200;12..96,400;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Spline+Sans+Mono:wght@400;600&display=swap">
+<style>
+/* design/DESIGN-DNA.md: riso broadsheet */
+:root{
+  --paper:#f3efe4;--paper-2:#ebe6d7;--ink:#14161f;--muted:#5d5a52;--rule:#c9c2ac;
+  --accent:#2438c9;--pass2:#ff5a1f;--ok:#14806e;--warn:#b8860b;--err:#d63c2f;
+  --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --body:"Newsreader",Georgia,"Times New Roman",serif;
+  --mono:"Spline Sans Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 var(--body)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px 72px}
+.mast{position:relative;padding:34px 0 14px;border-bottom:4px double var(--ink);overflow:hidden}
+.mast::before{content:"";position:absolute;inset:0 0 0 45%;background:radial-gradient(circle,var(--accent) 1.4px,transparent 1.6px) 0 0/9px 9px;
+  opacity:.28;-webkit-mask-image:linear-gradient(to left,#000,transparent 85%);mask-image:linear-gradient(to left,#000,transparent 85%)}
+.mast h1{position:relative;font:800 clamp(56px,11vw,132px)/.86 var(--display);letter-spacing:-.045em;margin:0;font-variation-settings:"opsz" 96}
+.mast h1 em{font-style:normal;font-weight:200;color:var(--accent)}
+.dateline{position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 24px;margin-top:14px;
+  font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--ink);padding-top:6px}
+.filters{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--ink);padding:10px 0;
+  display:flex;flex-wrap:wrap;gap:8px 28px;align-items:center}
+.group{display:flex;align-items:center;gap:8px}
+.group label{font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.seg{display:flex;border:1px solid var(--ink)}
+.seg button{background:none;border:0;color:var(--ink);padding:4px 11px;font:12px var(--mono);cursor:pointer}
+.seg button+button{border-left:1px solid var(--ink)}
+.seg button.on{background:var(--ink);color:var(--paper)}
+.seg button:hover:not(.on){background:var(--paper-2)}
+select{max-width:280px;background:var(--paper);color:var(--ink);border:1px solid var(--ink);border-radius:0;padding:4px 8px;font:12px var(--mono)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.front{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr);border-bottom:1px solid var(--ink)}
+.lead{padding:26px 28px 24px 0;border-right:1px solid var(--rule)}
+.lead .lab,.fig .lab{font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lead b{display:block;font:800 clamp(64px,10vw,124px)/.9 var(--display);letter-spacing:-.05em;color:var(--accent);margin:6px 0 2px;font-variation-settings:"opsz" 96}
+.lead .delta{font:14px var(--mono)}
+.lead p{margin:10px 0 0;color:var(--muted);max-width:44ch;font-style:italic}
+.figs{display:grid;grid-template-columns:1fr 1fr;align-content:start}
+.fig{padding:16px 20px;border-bottom:1px solid var(--rule)}
+.fig:nth-child(odd){border-right:1px solid var(--rule)}
+.fig:nth-last-child(-n+2){border-bottom:0}
+.fig b{display:block;font:600 34px/1.1 var(--display);letter-spacing:-.02em;margin-top:2px}
+.fig small{font:12px var(--mono);color:var(--muted)}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--err)}
+
+section{padding-top:34px;animation:rise .5s both}
+section:nth-of-type(1){animation-delay:.06s}section:nth-of-type(2){animation-delay:.12s}section:nth-of-type(3){animation-delay:.18s}
+section:nth-of-type(4){animation-delay:.24s}section:nth-of-type(5){animation-delay:.3s}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){section{animation:none}}
+h2{display:flex;align-items:baseline;gap:14px;margin:0 0 4px;font:800 30px/1.1 var(--display);letter-spacing:-.03em;border-top:4px double var(--ink);padding-top:10px}
+h2 i{font:400 12px var(--mono);letter-spacing:.06em;color:var(--pass2);font-style:normal;text-transform:uppercase}
+.lede{margin:0 0 14px;color:var(--muted);max-width:74ch}
+.mono{font-family:var(--mono)}
+.scroll{overflow-x:auto}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font:11px var(--mono);color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font:11px var(--mono);letter-spacing:.06em;text-transform:uppercase;text-align:left;color:var(--muted);padding:6px 10px;border-bottom:2px solid var(--ink);white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+td small{display:block;font:11px var(--mono);color:var(--muted)}
+td.sub{color:var(--muted);font:12px var(--mono)}
+.tag{font:11px var(--mono);border:1px solid var(--ink);padding:0 5px;text-transform:uppercase;letter-spacing:.05em}
+.insights{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;column-rule:1px solid var(--rule)}
+.insight{padding:12px 0 14px;border-bottom:1px solid var(--rule)}
+.insight b{display:flex;gap:10px;align-items:baseline;font:600 18px/1.25 var(--display);letter-spacing:-.01em}
+.insight b s{flex:none;width:9px;height:9px;border-radius:50%;background:var(--muted);text-decoration:none;transform:translateY(-1px)}
+.insight b s.bad{background:var(--pass2)}.insight b s.warn{background:var(--warn)}.insight b s.info{background:var(--accent)}
+.insight p{margin:3px 0 0}
+.insight .why{color:var(--muted);font-size:14px}
+.insight .fix{font-style:italic}
+.bars{display:grid;gap:7px}
+.bar{display:grid;grid-template-columns:170px 1fr 64px;gap:12px;align-items:center;font-size:14px}
+.bar .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{display:flex;height:14px}
+.bar .track i{display:block;height:100%}
+.bar .c{text-align:right;font:12px var(--mono);color:var(--muted)}
+.empty{color:var(--muted);font-style:italic;margin:0}
+iframe{width:100%;border:1px solid var(--ink);background:#0d1117;min-height:600px}
+footer{margin-top:44px;border-top:1px solid var(--ink);padding-top:8px;font:11px var(--mono);color:var(--muted);letter-spacing:.04em}
+@media(max-width:820px){.front{grid-template-columns:1fr}.lead{border-right:0;padding-right:0;border-bottom:1px solid var(--rule)}
+  .insights{grid-template-columns:1fr}.bar{grid-template-columns:100px 1fr 52px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="mast">
+  <h1>Kit <em>Monitor</em></h1>
+  <div class="dateline"><span id="gen"></span><span id="win"></span></div>
+</div>
+
+<div class="filters">
+  <div class="group"><label>Range</label><div class="seg" id="f-range"></div></div>
+  <div class="group"><label>Agent</label><div class="seg" id="f-agent"></div></div>
+  <div class="group"><label for="f-proj">Project</label><select id="f-proj"></select></div>
+</div>
+
+<div class="front">
+  <div class="lead" id="lead"></div>
+  <div class="figs" id="figs"></div>
+</div>
+
+<section>
+  <h2><i>No. 01</i>Spend per day</h2>
+  <p class="lede" id="spend-lede"></p>
+  <div class="group" style="margin-bottom:8px"><label>Metric</label><div class="seg" id="f-metric"></div></div>
+  <div class="scroll" id="chart-days"></div><div class="legend" id="legend-days"></div>
+</section>
+
+<section>
+  <h2><i>No. 02</i>What to look at</h2>
+  <p class="lede">Rules run over the filtered window, on transcripts and hook records only. A rule that does not fire stays out of the paper.</p>
+  <div class="insights" id="insights"></div>
+</section>
+
+<section>
+  <h2><i>No. 03</i>Most expensive sessions</h2>
+  <p class="lede">Cost units weight tokens by list-price ratios: input 1, cache write 2 (1h), cache read 0.1, output 5. Compare sessions with each other; it is not a bill.</p>
+  <div class="scroll"><table id="sessions"></table></div>
+</section>
+
+<section>
+  <h2><i>No. 04</i>Tool mix</h2>
+  <p class="lede">What each project's calls are made of. Antigravity counts are approximate: tool names scanned in protobuf blobs.</p>
+  <div class="bars" id="tools"></div><div class="legend" id="legend-tools"></div>
+</section>
+
+<section>
+  <h2><i>No. 05</i>Hooks</h2>
+  <p class="lede">Decisions the enforcement hooks recorded, per host. A dash means the hook is not part of that host's set; a dot means it is but never fired in this window.</p>
+  <div class="scroll" id="chart-gates"></div><div class="legend" id="legend-gates"></div>
+  <div class="scroll"><table id="hooks" style="margin-top:14px"></table></div>
+</section>
+
+<section id="vault-sec">
+  <h2><i>Exhibit</i>Vault</h2>
+  <p class="lede">Generated by vault-stats.py (obsidian-vault-bridge). Not filtered by the controls above.</p>
+  <iframe id="vault" srcdoc="__VAULT__" title="Vault dashboard"></iframe>
+</section>
+
+<footer id="foot"></footer>
+</div>
+
+<script>
+const DATA = __DATA__;
+const W = {in: 1, cc: 2, cr: 0.1, out: 5};
+const INK = ["#2438c9", "#ff5a1f", "#14806e", "#b8860b", "#7a3fb0", "#14161f"];
+const OTHER = "url(#hatch)";
+const TOOL_CATS = [["graph", "#2438c9"], ["manual", "#ff5a1f"], ["bash", "#b8860b"], ["edit", "#14806e"],
+                   ["skill", "#7a3fb0"], ["worker", "#5b7a99"], ["mcp", "#14161f"], ["agent", "#8a8574"], ["other", "#c9c2ac"]];
+const GATES = ["crg-gate", "skill-gate", "bash-edit-guard", "lint-on-edit", "session-size-nudge"];
+const METRICS = {cost: "Cost units", calls: "API calls", out: "Output tokens", ctx: "Context tokens"};
+const state = {range: 14, agent: "all", proj: "all", metric: "cost"};
+
+const $ = id => document.getElementById(id);
+const cost = r => r.in * W.in + r.cc * W.cc + r.cr * W.cr + r.out * W.out;
+const ctx = r => r.in + r.cc + r.cr;
+const val = (r, m) => m === "cost" ? cost(r) : m === "calls" ? r.calls : m === "out" ? r.out : ctx(r);
+const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+function fmt(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + "k";
+  return String(Math.round(n));
+}
+const pct = x => (x * 100).toFixed(0) + "%";
+const dayStr = d => { const p = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); };
+const back = n => { const d = new Date(); d.setDate(d.getDate() - n); return dayStr(d); };
+const cutoff = () => back(state.range - 1);
+const days = () => { const out = [], d = new Date(); d.setDate(d.getDate() - (state.range - 1));
+  for (let i = 0; i < state.range; i++) { out.push(dayStr(d)); d.setDate(d.getDate() + 1); } return out; };
+
+const agentOk = r => state.agent === "all" || r.a === state.agent;
+const projOk = r => state.proj === "all" || r.p === state.proj;
+const rows = () => DATA.sessions.filter(r => r.d >= cutoff() && agentOk(r) && projOk(r));
+const prevRows = () => DATA.sessions.filter(r => r.d >= back(2 * state.range - 1) && r.d < cutoff() && agentOk(r) && projOk(r));
+const hookRows = () => DATA.hooks.filter(r => r.d >= cutoff() && agentOk(r) && projOk(r));
+
+// one entry per (agent, session) across the filtered days
+function bySession(rs) {
+  const m = new Map();
+  for (const r of rs) {
+    const k = r.a + r.s;
+    let s = m.get(k);
+    if (!s) { s = {a: r.a, s: r.s, p: r.p, first: r.d, last: r.d, calls: 0, in: 0, cc: 0, cr: 0, out: 0, t: {}}; m.set(k, s); }
+    s.first = r.d < s.first ? r.d : s.first; s.last = r.d > s.last ? r.d : s.last;
+    for (const f of ["calls", "in", "cc", "cr", "out"]) s[f] += r[f];
+    for (const [t, n] of Object.entries(r.t)) s.t[t] = (s.t[t] || 0) + n;
+  }
+  return [...m.values()];
+}
+const cacheHit = r => { const c = ctx(r); return c ? r.cr / c : 0; };
+const toolTotals = rs => { const t = {}; for (const r of rs) for (const [k, n] of Object.entries(r.t)) t[k] = (t[k] || 0) + n; return t; };
+
+function seg(el, opts, key, labels) {
+  el.innerHTML = opts.map(o => `<button data-v="${o}" class="${String(state[key]) === String(o) ? "on" : ""}">${labels ? labels[o] : o}</button>`).join("");
+  el.onclick = e => { const b = e.target.closest("button"); if (!b) return;
+    state[key] = key === "range" ? +b.dataset.v : b.dataset.v; render(); };
+}
+
+function stacked(el, legendEl, dayList, series, keys, fmtTip) {
+  const w = 1000, h = 240, padL = 44, padB = 22, padT = 8;
+  const fills = keys.map((k, j) => k === "other" ? OTHER : INK[j % INK.length]);
+  const top = Math.max(...dayList.map(d => sum(keys, k => (series[d] || {})[k] || 0)), 1);
+  const bw = (w - padL) / dayList.length;
+  let out = `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" font-family="Spline Sans Mono, monospace">`
+    + '<defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
+    + '<rect width="5" height="5" fill="#f3efe4"/><line x1="0" y1="0" x2="0" y2="5" stroke="#14161f" stroke-width="1.6"/></pattern></defs>';
+  for (let i = 0; i <= 3; i++) {
+    const y = padT + (h - padB - padT) * (1 - i / 3);
+    out += `<line x1="${padL}" x2="${w}" y1="${y}" y2="${y}" stroke="${i ? "#c9c2ac" : "#14161f"}"/>`
+         + `<text x="${padL - 6}" y="${y + 4}" text-anchor="end" fill="#5d5a52" font-size="10">${fmt(top * i / 3)}</text>`;
+  }
+  dayList.forEach((d, i) => {
+    let y = h - padB;
+    keys.forEach((k, j) => {
+      const v = (series[d] || {})[k] || 0;
+      if (!v) return;
+      const bh = (h - padB - padT) * v / top;
+      y -= bh;
+      out += `<rect x="${(padL + i * bw + 1).toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(bw - 2, 1).toFixed(1)}" height="${bh.toFixed(1)}" fill="${fills[j]}"><title>${d} · ${esc(k)}: ${fmtTip(v)}</title></rect>`;
+    });
+    if (i % Math.ceil(dayList.length / 10) === 0)
+      out += `<text x="${(padL + i * bw).toFixed(0)}" y="${h - 6}" fill="#5d5a52" font-size="10">${d.slice(5)}</text>`;
+  });
+  el.innerHTML = out + "</svg>";
+  legendEl.innerHTML = keys.map((k, j) => `<span><i style="background:${k === "other" ? "repeating-linear-gradient(45deg,#14161f 0 1.5px,#f3efe4 1.5px 4px)" : fills[j]}"></i>${esc(k)}</span>`).join("");
+}
+
+function renderFront(rs, hs) {
+  const cur = sum(rs, cost), prev = sum(prevRows(), cost);
+  let delta = '<span class="mono" style="color:var(--muted)">no earlier window in the data</span>';
+  if (prev > 0) {
+    const d = (cur - prev) / prev;
+    delta = `<span class="${d > 0.25 ? "bad" : d < -0.1 ? "ok" : ""}">${d > 0 ? "up" : "down"} ${pct(Math.abs(d))}</span> <span style="color:var(--muted)">on the ${state.range} days before (${fmt(prev)})</span>`;
+  }
+  const ss = bySession(rs), calls = sum(rs, r => r.calls);
+  $("lead").innerHTML = `<span class="lab">Cost units · last ${state.range} days</span><b>${fmt(cur)}</b><div class="delta">${delta}</div>`
+    + `<p>${ss.length} sessions and ${fmt(calls)} API calls. Input-equivalent tokens, weighted by list-price ratios.</p>`;
+  const c = ctx({in: sum(rs, r => r.in), cc: sum(rs, r => r.cc), cr: sum(rs, r => r.cr)});
+  const t = toolTotals(rs), g = t.graph || 0, m = t.manual || 0;
+  const ch = c ? sum(rs, r => r.cr) / c : null, st = g + m ? g / (g + m) : null;
+  const gateBlocks = sum(hs.filter(h => GATES.slice(0, 3).includes(h.h)), h => h.n);
+  const f = [
+    ["Cache hit", ch == null ? "n/a" : pct(ch), "of context tokens", ch == null ? "" : ch >= 0.9 ? "ok" : ch >= 0.8 ? "warn" : "bad"],
+    ["Structural ratio", st == null ? "n/a" : pct(st), `${g} graph · ${m} manual`, st == null ? "" : st >= 0.5 ? "ok" : st >= 0.25 ? "warn" : "bad"],
+    ["Output tokens", fmt(sum(rs, r => r.out)), "written by the models", ""],
+    ["Gate blocks", fmt(gateBlocks), "crg · skill · bash-edit", ""],
+  ];
+  $("figs").innerHTML = f.map(([l, v, n, cls]) => `<div class="fig"><span class="lab">${l}</span><b class="${cls}">${v}</b><small>${n}</small></div>`).join("");
+}
+
+function renderDays(rs) {
+  const byProj = {};
+  for (const r of rs) byProj[r.p] = (byProj[r.p] || 0) + val(r, state.metric);
+  const ranked = Object.entries(byProj).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).map(x => x[0]);
+  const top = ranked.slice(0, 5), keys = ranked.length > 5 ? [...top, "other"] : top;
+  const series = {};
+  for (const r of rs) {
+    const d = (series[r.d] = series[r.d] || {}), k = top.includes(r.p) ? r.p : "other";
+    d[k] = (d[k] || 0) + val(r, state.metric);
+  }
+  $("spend-lede").textContent = `${METRICS[state.metric]} per day, stacked by project (top 5). Antigravity has no token data, so it appears only under API calls.`;
+  if (!keys.length) { $("chart-days").innerHTML = '<p class="empty">No data in this window.</p>'; $("legend-days").innerHTML = ""; return; }
+  stacked($("chart-days"), $("legend-days"), days(), series, keys, fmt);
+}
+
+function renderInsights(rs, hs) {
+  const out = [], ss = bySession(rs), totalCost = sum(rs, cost);
+  const tokenSess = ss.filter(s => s.a !== "antigravity");
+
+  const long = tokenSess.filter(s => s.calls > 500);
+  if (long.length) {
+    const share = sum(long, cost) / (totalCost || 1);
+    out.push({sev: share > 0.25 ? "bad" : "warn", title: `${long.length} session(s) passed 500 API calls: ${pct(share)} of all cost`,
+      why: long.slice(0, 3).map(s => `${s.p} ${s.first}${s.first !== s.last ? " → " + s.last : ""}: ${s.calls} calls, ${fmt(cost(s))} units`).join(" · "),
+      fix: "Every call re-bills the whole transcript, so cost grows faster than length. Close at a task boundary and resume in a fresh session."});
+  }
+  const lowCache = tokenSess.filter(s => s.calls > 50 && cacheHit(s) < 0.7);
+  if (lowCache.length)
+    out.push({sev: "warn", title: `${lowCache.length} session(s) with cache hit under 70%`,
+      why: lowCache.slice(0, 3).map(s => `${s.p} ${s.last}: ${pct(cacheHit(s))} over ${s.calls} calls`).join(" · "),
+      fix: "Idle gaps longer than the cache TTL, or edits to the early context (CLAUDE.md, tool list), force full re-reads."});
+
+  const perProj = {};
+  for (const r of rs) { const p = (perProj[r.p] = perProj[r.p] || {}); for (const [k, n] of Object.entries(r.t)) p[k] = (p[k] || 0) + n; }
+  const drift = Object.entries(perProj).filter(([, t]) => (t.manual || 0) + (t.graph || 0) >= 20 && (t.graph || 0) / ((t.manual || 0) + (t.graph || 0)) < 0.4);
+  if (drift.length)
+    out.push({sev: "warn", title: `Manual reads dominate in ${drift.length} project(s)`,
+      why: drift.map(([p, t]) => `${p}: ${t.manual} manual vs ${t.graph || 0} graph`).join(" · "),
+      fix: "Start code tasks with the graph tools. If the graph does not index those files (config, IaC, docs), this is expected."});
+  const noWorker = tokenSess.filter(s => s.a === "claude" && s.calls >= 150 && !(s.t && s.t.worker));
+  if (noWorker.length)
+    out.push({sev: "info", title: `${noWorker.length} long Claude session(s) (150+ calls) never asked a worker`,
+      why: noWorker.slice(0, 3).map(s => `${s.p} ${s.last}: ${s.calls} calls`).join(" · "),
+      fix: "Reviews, \"how does X work\" sweeps and log triage are reading work: ask_worker (Gemini) does them outside this transcript."});
+  const bashy = Object.entries(perProj).filter(([, t]) => { const n = sum(Object.values(t), x => x); return n >= 100 && (t.bash || 0) / n > 0.6; });
+  if (bashy.length)
+    out.push({sev: "info", title: `Bash is over 60% of tool calls in ${bashy.length} project(s)`,
+      why: bashy.map(([p, t]) => `${p}: ${t.bash} of ${sum(Object.values(t), x => x)}`).join(" · "),
+      fix: "Fine for ops work. In code projects it usually means grep and cat through the shell, which skips the graph and the edit linter."});
+
+  const t = toolTotals(rs);
+  if ((t.edit || 0) >= 40 && !(t.skill || 0))
+    out.push({sev: "info", title: `${t.edit} edits and no Skill invocation`,
+      why: "Skills are native tools here; none was called in this window.",
+      fix: "Check whether a skill (testing, security, devops) applied to that work."});
+
+  const top = ss.slice().sort((a, b) => cost(b) - cost(a))[0];
+  if (top && totalCost && cost(top) / totalCost > 0.3 && !long.includes(top))
+    out.push({sev: "info", title: `One session is ${pct(cost(top) / totalCost)} of cost`,
+      why: `${top.p} ${top.last}: ${top.calls} calls, ${fmt(cost(top))} units`, fix: "Find it in the table below and see which tools drove it."});
+
+  // a host with activity but no hook ledger rows: a silently dead gate leaves the same trace as nothing to block
+  const seen = new Set(hs.map(h => h.a));
+  for (const a of ["qwen", "antigravity"]) {
+    const n = sum(rs.filter(r => r.a === a), r => r.calls);
+    if (n > 30 && !seen.has(a))
+      out.push({sev: "bad", title: `${a}: ${n} calls but no hook decision recorded`,
+        why: "Either nothing needed blocking, or the hooks never ran on that host. The ledger cannot tell these apart.",
+        fix: "Run the hook self-test for that host before trusting the silence."});
+  }
+
+  $("insights").innerHTML = out.length
+    ? out.map(i => `<div class="insight"><b><s class="${i.sev}"></s>${esc(i.title)}</b><p class="why">${esc(i.why)}</p><p class="fix">${esc(i.fix)}</p></div>`).join("")
+    : '<p class="empty">Nothing flagged in this window.</p>';
+}
+
+function renderSessions(rs) {
+  const ss = bySession(rs).filter(s => s.a !== "antigravity").sort((a, b) => cost(b) - cost(a)).slice(0, 15);
+  if (!ss.length) { $("sessions").innerHTML = '<tr><td class="empty">No token data in this window.</td></tr>'; return; }
+  $("sessions").innerHTML = '<thead><tr><th>Session</th><th>Agent</th><th class="num">Calls</th><th class="num">Cache</th>'
+    + '<th class="num">Output</th><th class="num">Cost units</th><th>Main tools</th></tr></thead><tbody>'
+    + ss.map(s => {
+      const tools = Object.entries(s.t).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, n]) => `${k} ${n}`).join(", ");
+      const ch = cacheHit(s);
+      return `<tr><td>${esc(s.p)}<small>${s.first}${s.first !== s.last ? " → " + s.last : ""} · ${s.s}</small></td><td><span class="tag">${s.a}</span></td>`
+        + `<td class="num ${s.calls > 500 ? "bad" : ""}">${s.calls}</td><td class="num ${ch < 0.7 ? "warn" : ""}">${pct(ch)}</td>`
+        + `<td class="num">${fmt(s.out)}</td><td class="num">${fmt(cost(s))}</td><td class="sub">${esc(tools)}</td></tr>`;
+    }).join("") + "</tbody>";
+}
+
+function renderTools(rs) {
+  const per = {};
+  for (const r of rs) { const p = (per[r.p] = per[r.p] || {}); for (const [k, n] of Object.entries(r.t)) p[k] = (p[k] || 0) + n; }
+  const list = Object.entries(per).map(([p, t]) => [p, t, sum(Object.values(t), x => x)]).filter(x => x[2] > 0).sort((a, b) => b[2] - a[2]).slice(0, 12);
+  const max = Math.max(...list.map(x => x[2]), 1);
+  $("tools").innerHTML = list.length ? list.map(([p, t, n]) =>
+    `<div class="bar"><span class="name" title="${esc(p)}">${esc(p)}</span><span class="track" style="width:${(100 * n / max).toFixed(0)}%">`
+    + TOOL_CATS.map(([k, c]) => t[k] ? `<i style="width:${(100 * t[k] / n).toFixed(1)}%;background:${c}" title="${k}: ${t[k]}"></i>` : "").join("")
+    + `</span><span class="c">${fmt(n)}</span></div>`).join("") : '<p class="empty">No tool calls in this window.</p>';
+  $("legend-tools").innerHTML = TOOL_CATS.map(([k, c]) => `<span><i style="background:${c}"></i>${k}</span>`).join("");
+}
+
+function renderHooks(hs) {
+  const agents = ["claude", "qwen", "antigravity"];
+  const t = {};
+  for (const h of hs) { const x = (t[h.h] = t[h.h] || {}); x[h.a] = (x[h.a] || 0) + h.n; }
+  const names = Object.keys(t).sort((a, b) => sum(Object.values(t[b]), x => x) - sum(Object.values(t[a]), x => x));
+  const series = {};
+  for (const h of hs) if (GATES.includes(h.h)) { const d = (series[h.d] = series[h.d] || {}); d[h.h] = (d[h.h] || 0) + h.n; }
+  if (Object.keys(series).length) stacked($("chart-gates"), $("legend-gates"), days(), series, GATES, fmt);
+  else { $("chart-gates").innerHTML = '<p class="empty">No gate decisions in this window.</p>'; $("legend-gates").innerHTML = ""; }
+  $("hooks").innerHTML = names.length
+    ? '<thead><tr><th>Hook</th>' + agents.map(a => `<th class="num">${a}</th>`).join("") + '</tr></thead><tbody>'
+      + names.map(n => `<tr><td>${esc(n)}${GATES.includes(n) ? ' <span class="tag">gate</span>' : ""}</td>`
+        + agents.map(a => `<td class="num ${t[n][a] ? "" : "sub"}">${t[n][a] || "–"}</td>`).join("") + "</tr>").join("") + "</tbody>"
+    : '<tr><td class="empty">No hook decisions in this window.</td></tr>';
+}
+
+function render() {
+  seg($("f-range"), [7, 14, 30, 60], "range", {7: "7d", 14: "14d", 30: "30d", 60: "60d"});
+  seg($("f-agent"), ["all", "claude", "qwen", "antigravity"], "agent");
+  seg($("f-metric"), Object.keys(METRICS), "metric", METRICS);
+  const pool = DATA.sessions.filter(r => r.d >= cutoff() && agentOk(r));
+  const pc = {};
+  for (const r of pool) pc[r.p] = (pc[r.p] || 0) + cost(r) + r.calls;
+  const projs = Object.keys(pc).sort((a, b) => pc[b] - pc[a]);
+  if (state.proj !== "all" && !projs.includes(state.proj)) state.proj = "all";
+  $("f-proj").innerHTML = ["all", ...projs].map(p => `<option ${p === state.proj ? "selected" : ""}>${esc(p)}</option>`).join("");
+  $("f-proj").onchange = e => { state.proj = e.target.value; render(); };
+  $("win").textContent = `${cutoff()} → ${dayStr(new Date())}`;
+  const rs = rows(), hs = hookRows();
+  renderFront(rs, hs); renderDays(rs); renderInsights(rs, hs); renderSessions(rs); renderTools(rs); renderHooks(hs);
+}
+
+$("gen").textContent = "Edition of " + DATA.generated;
+$("foot").textContent = "kit monitor · sources: ~/.claude/projects, ~/.qwen/projects, ~/.gemini/antigravity-*, ~/.claude/hook-metrics.jsonl";
+const vf = $("vault");
+if (!vf.getAttribute("srcdoc")) $("vault-sec").style.display = "none";
+vf.onload = () => { try { vf.style.height = vf.contentDocument.documentElement.scrollHeight + 8 + "px"; } catch (e) { /* keep min-height */ } };
+render();
+</script>
+</body>
+</html>

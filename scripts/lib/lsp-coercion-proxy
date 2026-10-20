@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""
+Qwen Code MCP proxy for lsp-mcp-server.
+
+Qwen Code serializes numeric args as strings ("1" not 1) and validates
+schemas client-side, so the error fires before reaching the server.
+
+Two-layer fix:
+  1. tools/list responses: remove `type` from numeric param schemas so
+     Qwen's validator (Ajv strict mode) accepts any value including strings.
+  2. tools/call requests: coerce string→int for known numeric params before
+     forwarding to lsp-mcp-server.
+"""
+import os
+import sys
+import json
+import subprocess
+import threading
+import signal
+import shutil
+import glob
+
+NUMERIC_PARAMS = {
+    "line", "column", "start_line", "start_column", "end_line", "end_column",
+    "limit", "offset", "tab_size", "references_limit", "depth", "token_budget",
+    "top_n", "min_lines", "min_size", "action_index",
+}
+
+
+def relax_schema(schema):
+    """Remove 'type' constraint from known numeric params so strings pass validation."""
+    if not isinstance(schema, dict):
+        return schema
+    out = {}
+    for k, v in schema.items():
+        if k == "properties" and isinstance(v, dict):
+            out[k] = {
+                pk: ({kk: vv for kk, vv in pv.items() if kk != "type"}
+                     if isinstance(pv, dict) and pv.get("type") == "number" and pk in NUMERIC_PARAMS
+                     else relax_schema(pv))
+                for pk, pv in v.items()
+            }
+        elif isinstance(v, dict):
+            out[k] = relax_schema(v)
+        elif isinstance(v, list):
+            out[k] = [relax_schema(i) if isinstance(i, dict) else i for i in v]
+        else:
+            out[k] = v
+    return out
+
+
+def coerce(obj):
+    """Recursively coerce known numeric params from string to int."""
+    if isinstance(obj, dict):
+        return {
+            k: (int(v) if k in NUMERIC_PARAMS and isinstance(v, str) and v.lstrip("-").isdigit()
+                else coerce(v))
+            for k, v in obj.items()
+        }
+    if isinstance(obj, list):
+        return [coerce(i) for i in obj]
+    return obj
+
+
+_pending_tools_list: set = set()
+_lock = threading.Lock()
+
+
+def patch_inbound(line: bytes) -> bytes:
+    try:
+        msg = json.loads(line)
+        if msg.get("method") == "tools/list":
+            with _lock:
+                _pending_tools_list.add(msg.get("id"))
+        if "params" in msg:
+            msg["params"] = coerce(msg["params"])
+        return (json.dumps(msg, separators=(",", ":")) + "\n").encode()
+    except (json.JSONDecodeError, TypeError):
+        return line if line.endswith(b"\n") else line + b"\n"
+
+
+def patch_outbound(line: bytes) -> bytes:
+    try:
+        msg = json.loads(line)
+        with _lock:
+            if msg.get("id") in _pending_tools_list:
+                _pending_tools_list.discard(msg["id"])
+                try:
+                    for tool in msg["result"]["tools"]:
+                        if "inputSchema" in tool:
+                            tool["inputSchema"] = relax_schema(tool["inputSchema"])
+                except (KeyError, TypeError):
+                    pass
+        return (json.dumps(msg, separators=(",", ":")) + "\n").encode()
+    except (json.JSONDecodeError, TypeError):
+        return line if line.endswith(b"\n") else line + b"\n"
+
+
+def pipe(src, dst, patch_fn=None):
+    try:
+        while True:
+            line = src.readline()
+            if not line:
+                break
+            out = patch_fn(line) if patch_fn else line
+            dst.write(out)
+            dst.flush()
+    except (OSError, ValueError):
+        pass
+    finally:
+        try:
+            dst.close()
+        except Exception:
+            pass
+
+
+def _user_node_bins() -> list[str]:
+    """Return user-local Node bin dirs: ~/.npm-global/bin + NVM dirs, newest-first."""
+    dirs = []
+    npm_global = os.path.expanduser("~/.npm-global/bin")
+    if os.path.isdir(npm_global):
+        dirs.append(npm_global)
+    nvm_pattern = os.path.expanduser("~/.nvm/versions/node/*/bin")
+    dirs.extend(sorted(glob.glob(nvm_pattern), reverse=True))
+    return dirs
+
+
+def _build_env_with_nvm() -> dict:
+    """Return os.environ with user Node bin dirs prepended to PATH."""
+    extra = _user_node_bins()
+    if not extra:
+        return os.environ.copy()
+    env = os.environ.copy()
+    current_path = env.get("PATH", "")
+    env["PATH"] = ":".join(extra) + (":" + current_path if current_path else "")
+    return env
+
+
+def _resolve_lsp_mcp_server() -> str:
+    """Find lsp-mcp-server in PATH, ~/.npm-global/bin, or NVM dirs."""
+    found = shutil.which("lsp-mcp-server")
+    if found:
+        return found
+    for bin_dir in _user_node_bins():
+        candidate = os.path.join(bin_dir, "lsp-mcp-server")
+        if os.path.isfile(candidate):
+            return candidate
+    return "lsp-mcp-server"  # let Popen raise FileNotFoundError with a clear message
+
+
+proc = subprocess.Popen(
+    [_resolve_lsp_mcp_server()],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    env=_build_env_with_nvm(),
+)
+
+
+def _terminate(sig, frame):
+    proc.terminate()
+
+
+signal.signal(signal.SIGTERM, _terminate)
+signal.signal(signal.SIGINT, _terminate)
+
+for target, args in [
+    (pipe, (sys.stdin.buffer,  proc.stdin,        patch_inbound)),
+    (pipe, (proc.stdout,       sys.stdout.buffer,  patch_outbound)),
+    (pipe, (proc.stderr,       sys.stderr.buffer,  None)),
+]:
+    t = threading.Thread(target=target, args=args, daemon=True)
+    t.start()
+
+proc.wait()
+os._exit(0)   # bypass Python shutdown to avoid BufferedReader lock crash

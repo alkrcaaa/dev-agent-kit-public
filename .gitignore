@@ -1,0 +1,83 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets / keys
+*.env.local
+.env
+.env.*
+!models.cloud.env
+!.env-example
+!.env.example
+.mcp.json
+!.mcp.json.template
+.envrc
+!.envrc.template
+scripts/setup/.env.defaults
+
+# Claude Code project-level runtime data
+.claude/
+
+# Claude cloud runtime data (not part of the kit)
+claude-cloud/.credentials.json
+claude-cloud/.claude.json
+claude-cloud/backups/
+claude-cloud/cache/
+claude-cloud/history.jsonl
+claude-cloud/mcp-needs-auth-cache.json
+claude-cloud/paste-cache/
+claude-cloud/plugins/
+claude-cloud/projects/
+claude-cloud/sessions/
+claude-cloud/settings.json
+claude-cloud/shell-snapshots/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+
+# Temp
+tmp/
+.tmp/
+
+# OpenCode runtime artifacts
+.opencode/
+
+# Malformed path artifacts (file_tracker.db from MCP tools)
+http:/
+# Added by code-review-graph
+.code-review-graph/
+
+gha-creds-*.json
+
+
+#qwen
+
+.qwen/
+
+# Python virtual environments
+.venv/
+qwen-memory/MEMORY.md
+# Project-level Claude Code config (user-specific, not committed)
+.claude.json
+
+# Syncthing
+*.sync-conflict-*
+.syncthing.*.tmp
+
+# Playwright/browser test artifacts (ephemeral)
+artifacts/
+.playwright-mcp/

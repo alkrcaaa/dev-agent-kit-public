@@ -1,0 +1,11 @@
+# Source template for dev-agent-kit Codex deployment.
+# scripts/lib/agents.sh renders absolute paths and merges the managed block
+# into ~/.codex/config.toml.
+
+[features]
+multi_agent = true
+
+[agents]
+max_threads = 6
+max_depth = 1
+

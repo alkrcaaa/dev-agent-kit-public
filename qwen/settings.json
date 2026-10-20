@@ -1,0 +1,274 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude-mem-lite/scripts/hook-launcher.mjs\" hook.mjs session-start"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.qwen/hooks/consistency-check.py\"; [ -f \"$H\" ] && DAK_AGENT=qwen python3 \"$H\" --oneline || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.qwen/extern/obsidian-vault-bridge/hooks/vault-inject.py\"; [ -f \"$H\" ] && DAK_AGENT=qwen python3 \"$H\" || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.qwen/hooks/dispatch-inject.py\"; [ -f \"$H\" ] && DAK_AGENT=qwen python3 \"$H\" || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude-mem-lite/scripts/hook-launcher.mjs\" hook.mjs stop"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.qwen/extern/obsidian-vault-bridge/hooks/personal-capture.py\"; [ -f \"$H\" ] && DAK_AGENT=qwen python3 \"$H\" || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.qwen/extern/obsidian-vault-bridge/hooks/concept-capture.py\"; [ -f \"$H\" ] && DAK_AGENT=qwen python3 \"$H\" || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.qwen/extern/obsidian-vault-bridge/hooks/project-narrative.py\"; [ -f \"$H\" ] && DAK_AGENT=qwen python3 \"$H\" || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.qwen/extern/obsidian-vault-bridge/hooks/obsidian-mirror.py\"; [ -f \"$H\" ] && DAK_AGENT=qwen python3 \"$H\" --reconcile || true"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude-mem-lite/scripts/hook-launcher.mjs\" hook.mjs user-prompt"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/crg-autobuild.py\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/crg-gate.py\" remind"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/session-size-nudge.py\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/skill-nudge.py\" prompt"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "mcp__mem-lite__mem_save",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.qwen/extern/obsidian-vault-bridge/hooks/mem-save-guard.py\"; [ -f \"$H\" ] || exit 0; DAK_AGENT=qwen python3 \"$H\""
+          }
+        ]
+      },
+      {
+        "matcher": "edit|write_file|read_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/mem-bridge.py\" node \"$HOME/.claude-mem-lite/scripts/hook-launcher.mjs\" scripts/pre-tool-recall.js"
+          }
+        ]
+      },
+      {
+        "matcher": "skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/mem-bridge.py\" node \"$HOME/.claude-mem-lite/scripts/hook-launcher.mjs\" scripts/pre-skill-bridge.js"
+          }
+        ]
+      },
+      {
+        "matcher": "read_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/crg-gate.py\" gate read"
+          }
+        ]
+      },
+      {
+        "matcher": "grep_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/crg-gate.py\" gate grep"
+          }
+        ]
+      },
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/crg-gate.py\" gate bash"
+          }
+        ]
+      },
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/bash-edit-guard.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "edit|write_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/skill-gate.py\" gate"
+          }
+        ]
+      },
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/commit-attribution-guard.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/skill-nudge.py\" bash"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/mem-bridge.py\" bash \"$HOME/.claude-mem-lite/scripts/post-tool-use.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__code-review-graph__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/crg-gate.py\" mark"
+          }
+        ]
+      },
+      {
+        "matcher": "skill|read_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/skill-gate.py\" mark"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__playwright__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/snapshot-size-nudge.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mem-lite__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"$HOME/.qwen/extern/obsidian-vault-bridge/hooks/obsidian-mirror.py\"; [ -f \"$H\" ] && DAK_AGENT=qwen python3 \"$H\" || true"
+          }
+        ]
+      },
+      {
+        "matcher": "edit|write_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/crg-update.py\""
+          },
+          {
+            "type": "command",
+            "command": "DAK_AGENT=qwen python3 \"$HOME/.qwen/hooks/lint-on-edit.py\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

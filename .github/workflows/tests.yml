@@ -1,0 +1,71 @@
+name: 'Tests & Linting'
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # ratchet:actions/checkout@v5
+        with:
+          # extern/obsidian-vault-bridge is a private repo; the default job token
+          # cannot clone it. SUBMODULES_TOKEN: a fine-grained PAT with read access
+          # to alkrcaaa/obsidian-vault-bridge (Settings -> Secrets -> Actions).
+          token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
+
+      # One by one instead of `submodules: recursive`, which fails the whole job
+      # on the first private repo the token cannot read. A public submodule
+      # that will not clone is still an error; the owner's private ones are a
+      # warning, and the suites that need them skip when they are absent.
+      - name: Check out submodules
+        env:
+          GIT_TERMINAL_PROMPT: '0'
+        run: |
+          git config -f .gitmodules --get-regexp '\.path$' | while read -r key path; do
+            url="$(git config -f .gitmodules --get "${key%.path}.url")"
+            if git submodule update --init --recursive -- "$path"; then continue; fi
+            case "$url" in
+              https://github.com/alkrcaaa/*)
+                echo "::warning::$path not cloned (private repo; set SUBMODULES_TOKEN to test it)" ;;
+              *)
+                echo "::error::$path failed to clone"; exit 1 ;;
+            esac
+          done
+
+      - name: Set up Python
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # ratchet:actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Pinned: an unpinned ruff jumped to 0.16, whose wider default rule set
+      # failed 183 lines the kit never opted into. Bump deliberately, with the fixes.
+      - name: Install ruff
+        run: pip install --user ruff==0.15.8
+
+      - name: Install pyright
+        run: npm install -g typescript@6.0.2 pyright@1.1.408
+
+      - name: ShellCheck (warnings and above)
+        run: |
+          git ls-files '*.sh' | xargs shellcheck -S warning
+
+      - name: Ruff check
+        run: |
+          git ls-files '*.py' | xargs ruff check
+
+      - name: Pyright type check
+        run: pyright
+
+      - name: Run test suite
+        run: bash tests/run-all.sh
+
+      - name: Run doctor.sh (CI mode)
+        run: bash scripts/health/doctor.sh
