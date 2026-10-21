@@ -48,7 +48,7 @@
 	shallow = true
 [submodule "mcp-infra/local-model-mcp"]
 	path = mcp-infra/local-model-mcp
-	url = https://github.com/alkrcaaa/local-llm-mcp.git
+	url = https://github.com/alkrcaaa/local-llm-mcp-public.git
 [submodule "mcp-infra/llm-council-mcp"]
 	path = mcp-infra/llm-council-mcp
-	url = https://github.com/alkrcaaa/llm-council-mcp.git
+	url = https://github.com/alkrcaaa/llm-council-mcp-public.git

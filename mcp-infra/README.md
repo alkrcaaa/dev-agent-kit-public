@@ -117,7 +117,7 @@ Agent: browser_console_messages()  → check for JS errors
 
 ### local-model
 
-Delegates code-writing tasks to a local model (Qwen by default) running on a vLLM server, via [`mcp-infra/local-model-mcp`](https://github.com/alkrcaaa/local-llm-mcp) (its own repo, pulled in as a git submodule). Claude is the orchestrator; the local model is the worker. All implementation goes through this server — Claude never writes code itself when it's online.
+Delegates code-writing tasks to a local model (Qwen by default) running on a vLLM server, via [`mcp-infra/local-model-mcp`](https://github.com/alkrcaaa/local-llm-mcp-public) (its own repo, pulled in as a git submodule). Claude is the orchestrator; the local model is the worker. All implementation goes through this server — Claude never writes code itself when it's online.
 
 **When to use:** Any implementation task — new files, bug fixes, refactors, test writing.  
 **Claude-only** — the worker does not call itself.

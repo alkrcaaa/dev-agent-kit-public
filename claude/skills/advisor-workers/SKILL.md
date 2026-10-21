@@ -49,7 +49,7 @@ ask_worker(prompt, working_dir, worker="", role="review", timeout=300)
 
 ## Managing workers (you will be asked to)
 
-All in `mcp-infra/local-model-mcp/` (the submodule, repo `alkrcaaa/local-llm-mcp`):
+All in `mcp-infra/local-model-mcp/` (the submodule, repo `alkrcaaa/local-llm-mcp-public`):
 - `workers.json` (gitignored, re-read every call): host moved or model swapped → edit
   `base_url`; `model: ""` asks the server which id it serves. New worker = new entry.
   `kind: qwen` (OpenAI-compatible vLLM via Qwen CLI) or `kind: agy` (Gemini, subscription).
