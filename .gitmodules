@@ -1,40 +1,51 @@
 [submodule "extern/open-design"]
 	path = extern/open-design
 	url = https://github.com/nexu-io/open-design.git
+	shallow = true
 [submodule "extern/trailofbits-skills"]
 	path = extern/trailofbits-skills
 	url = https://github.com/trailofbits/skills.git
 	ignore = dirty
+	shallow = true
 [submodule "extern/claude-code-owasp"]
 	path = extern/claude-code-owasp
 	url = https://github.com/agamm/claude-code-owasp.git
+	shallow = true
 [submodule "extern/devops-claude-skills"]
 	path = extern/devops-claude-skills
 	url = https://github.com/ahmedasmar/devops-claude-skills.git
+	shallow = true
 [submodule "extern/skills"]
 	path = extern/skills
 	url = https://github.com/anthropics/skills.git
+	shallow = true
 [submodule "extern/andrej-karpathy-skills"]
 	path = extern/andrej-karpathy-skills
 	url = https://github.com/forrestchang/andrej-karpathy-skills.git
+	shallow = true
 [submodule "mcp-infra/code-review-graph"]
 	path = mcp-infra/code-review-graph
 	url = https://github.com/tirth8205/code-review-graph.git
+	shallow = true
 [submodule "extern/drawio-skill"]
 	path = extern/drawio-skill
 	url = https://github.com/Agents365-ai/drawio-skill.git
+	shallow = true
 [submodule "extern/ansible-skills"]
 	path = extern/ansible-skills
 	url = https://github.com/sigridjineth/hello-ansible-skills
+	shallow = true
 [submodule "extern/taste-skill"]
 	path = extern/taste-skill
 	url = https://github.com/Leonxlnx/taste-skill
+	shallow = true
 [submodule "extern/obsidian-vault-bridge"]
 	path = extern/obsidian-vault-bridge
 	url = https://github.com/alkrcaaa/obsidian-vault-bridge.git
 [submodule "extern/skills-cli"]
 	path = extern/skills-cli
 	url = https://github.com/vercel-labs/skills.git
+	shallow = true
 [submodule "mcp-infra/local-model-mcp"]
 	path = mcp-infra/local-model-mcp
 	url = https://github.com/alkrcaaa/local-llm-mcp.git

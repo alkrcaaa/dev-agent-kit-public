@@ -15,16 +15,15 @@ Local and cloud AI coding agent setup kit. Install Claude Code and Qwen Code age
 | [extern/](extern/) | 11 git submodules — skills (karpathy, owasp, trailofbits, open-design, devops, anthropic, ansible, drawio, taste, skills-cli) + obsidian-vault-bridge |
 | [claude/](claude/) | Claude Code source templates (orchestrator, hooks, skills) |
 | [qwen/](qwen/) | Qwen Code source templates (orchestrator, settings) |
-| [qwen-memory/](qwen-memory/) | Auto-injected project conventions + memory files for Qwen worker calls |
 | [codex/](codex/) | Codex source templates (AGENTS.md, config, agents) |
 | [mcp-infra/](mcp-infra/) | MCP server sources — local-model bridge, llm-council, vault-search, code-review-graph submodule |
 | [tests/](tests/) | Library test suites, plus clean-machine and remote install tests |
-| [.github/workflows/](.github/) | Qwen Code GitHub CI (PR review, issue triage) |
+| [.github/workflows/](.github/) | CI: shellcheck, ruff, pyright and the test suite |
 
 ## Quick Start
 
 ```bash
-git clone --recursive git@github.com:alkrcaaa/dev-agent-kit.git ~/workspace/dev-agent-kit
+git clone --recursive --shallow-submodules https://github.com/alkrcaaa/dev-agent-kit.git ~/workspace/dev-agent-kit
 cd ~/workspace/dev-agent-kit
 bash install.sh http://<your-vllm-host>:8002/v1   # your vLLM server (must include /v1)
 ```
