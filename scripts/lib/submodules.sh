@@ -7,14 +7,16 @@ init_submodules() {
   # dir, and -d skipped every submodule there.
   if [[ ! -e "$REPO_ROOT/.git" ]]; then
     warn "Not a git repository — extern/ skills will be empty."
-    warn "Clone with: git clone --recursive https://github.com/..."
+    warn "Clone with: git clone https://github.com/alkrcaaa/dev-agent-kit-public.git (install.sh fetches the submodules)"
     return
   fi
-  info "git submodule update --init --recursive"
+  # --depth 1: fetch only the pinned commit. A plain recursive clone pulls every
+  # branch of every submodule (open-design alone was 3 GB and 12 minutes).
+  info "git submodule update --init --recursive --depth 1"
   # GIT_TERMINAL_PROMPT=0 (platform.sh) turns a credential prompt into a
   # failure and the bound turns a stalled clone into one, so the per-submodule
   # retry below names what is missing instead of the install hanging.
-  if run_bounded 1200 git -C "$REPO_ROOT" submodule update --init --recursive; then
+  if run_bounded 1200 git -C "$REPO_ROOT" submodule update --init --recursive --depth 1; then
     ok "Submodules ready"
     _warn_empty_submodules
     return
@@ -29,7 +31,7 @@ init_submodules() {
   local path
   local missing=()
   while read -r path; do
-    run_bounded 600 git -C "$REPO_ROOT" submodule update --init --recursive -- "$path" >/dev/null 2>&1 \
+    run_bounded 600 git -C "$REPO_ROOT" submodule update --init --recursive --depth 1 -- "$path" >/dev/null 2>&1 \
       || missing+=("$path")
   done < <(git -C "$REPO_ROOT" config -f "$REPO_ROOT/.gitmodules" \
              --get-regexp '^submodule\..*\.path$' | awk '{print $2}')
@@ -68,5 +70,5 @@ _warn_empty_submodules() {
   for path in "${empty[@]}"; do
     warn "    $path"
   done
-  warn "  fix: git -C $REPO_ROOT submodule update --init --recursive, then re-run install.sh"
+  warn "  fix: git -C $REPO_ROOT submodule update --init --recursive --depth 1, then re-run install.sh"
 }
