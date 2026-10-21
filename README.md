@@ -23,7 +23,7 @@ Local and cloud AI coding agent setup kit. Install Claude Code and Qwen Code age
 ## Quick Start
 
 ```bash
-git clone --recursive --shallow-submodules https://github.com/alkrcaaa/dev-agent-kit.git ~/workspace/dev-agent-kit
+git clone --recursive --shallow-submodules https://github.com/alkrcaaa/dev-agent-kit-public.git ~/workspace/dev-agent-kit
 cd ~/workspace/dev-agent-kit
 bash install.sh http://<your-vllm-host>:8002/v1   # your vLLM server (must include /v1)
 ```
