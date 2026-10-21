@@ -45,8 +45,6 @@ fi
 
 QWEN_BIN="$(command -v qwen 2>/dev/null || echo '')"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-# Resolve to repo root (scripts/health/../../ = repo root)
-SCRIPT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BOLD='\033[1m'; RESET='\033[0m'
 

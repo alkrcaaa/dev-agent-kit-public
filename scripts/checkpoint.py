@@ -243,9 +243,11 @@ def stale_notes():
     path = f"{HOME}/.claude/hooks/consistency-check.py"
     try:
         spec = importlib.util.spec_from_file_location("consistency_check", path)
+        if spec is None or spec.loader is None:
+            return None
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        mod.STALE_DAYS = 1
+        setattr(mod, "STALE_DAYS", 1)
         vc = mod._vault_common()
         return mod.check_stale_notes(vc) if vc else None
     except Exception:
